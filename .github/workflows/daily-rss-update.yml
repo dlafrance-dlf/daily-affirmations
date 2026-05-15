@@ -42,7 +42,7 @@ jobs:
                 <description>Your daily dose of positivity</description>
                 <pubDate>${currentUtcTime}</pubDate>
                 <item>
-                  <title>Today's Affirmation</title>
+                  <title><![CDATA[${chosenText}]]></title>
                   <description><![CDATA[${chosenText}]]></description>
                   <pubDate>${currentUtcTime}</pubDate>
                   <guid isPermaLink="false">${Date.now()}</guid>
