@@ -5,6 +5,9 @@ on:
     - cron: '15 0 * * *'  # Runs daily at 00:15 UTC
   workflow_dispatch:      # Allows manual testing
 
+permissions:
+  contents: write  # Grants permission to push code changes
+
 jobs:
   generate-rss:
     runs-on: ubuntu-latest
@@ -12,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate Random RSS Affirmation
+      - name: Generate Random RSS & HTML Homepage
         uses: actions/github-script@v7
         with:
           script: |
@@ -25,33 +28,85 @@ jobs:
 
             if (n === 0) throw new Error("The affirmations array is empty.");
 
-            // 2. Generate random index i between 0 and n-1
+            // 2. Generate random index i
             const i = Math.floor(Math.random() * n);
             const chosenText = affirmations[i];
+            const currentUtcTime = new Date().toUTCString();
 
-            // 3. Construct the RSS XML string
+            // 3. Construct the RSS XML with CDATA protection
             const rssContent = `<?xml version="1.0" encoding="UTF-8" ?>
             <rss version="2.0">
               <channel>
-                <title>Daily Affirmation</title>
-                <link>https://github.com{context.repo.owner}/${context.repo.repo}</link>
+                <title>Daily Affirmations</title>
+                <link>https://github.io</link>
                 <description>Your daily dose of positivity</description>
-                <pubDate>${new Date().toUTCString()}</pubDate>
+                <pubDate>${currentUtcTime}</pubDate>
                 <item>
                   <title>Today's Affirmation</title>
-                  <description>${chosenText}</description>
-                  <pubDate>${new Date().toUTCString()}</pubDate>
+                  <description><![CDATA[${chosenText}]]></description>
+                  <pubDate>${currentUtcTime}</pubDate>
                   <guid isPermaLink="false">${Date.now()}</guid>
                 </item>
               </channel>
             </rss>`.trim();
 
-            // 4. Write the file
+            // 4. Construct a clean, accessible HTML index page
+            const htmlContent = `<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Daily Affirmation</title>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                        background-color: #f4f7f6;
+                        color: #333;
+                    }
+                    .card {
+                        background: white;
+                        padding: 40px;
+                        border-radius: 12px;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                        text-align: center;
+                        max-width: 500px;
+                        width: 90%;
+                    }
+                    h1 {
+                        font-size: 1.8rem;
+                        line-height: 1.4;
+                        margin-bottom: 20px;
+                    }
+                    p {
+                        color: #777;
+                        font-size: 0.9rem;
+                    }
+                    a {
+                        color: #0066cc;
+                        text-decoration: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="card">
+                    <h1>"${chosenText}"</h1>
+                    <p>Updated: ${currentUtcTime}</p>
+                    <p><a href="todays-affirmation.xml">Subscribe to RSS Feed</a></p>
+                </div>
+            </body>
+            </html>`.trim();
+
+            // 5. Save both files to the root directory
             fs.writeFileSync('todays-affirmation.xml', rssContent);
+            fs.writeFileSync('index.html', htmlContent);
 
       - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update daily affirmation RSS feed"
-          file_pattern: 'todays-affirmation.xml'
-
+          commit_message: "chore: update daily affirmation RSS and HTML homepage"
+          file_pattern: 'todays-affirmation.xml index.html'
