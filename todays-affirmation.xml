@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
   <channel>
-    <title>Daily Affirmation</title>
-    <link>https://github.com{context.repo.owner}/daily-affirmations</link>
+    <title>Daily Affirmations</title>
+    <link>https://github.io</link>
     <description>Your daily dose of positivity</description>
-    <pubDate>Fri, 15 May 2026 03:26:57 GMT</pubDate>
+    <pubDate>Fri, 15 May 2026 03:40:38 GMT</pubDate>
     <item>
       <title>Today's Affirmation</title>
-      <description>I am attracting success by being my authentic self.</description>
-      <pubDate>Fri, 15 May 2026 03:26:57 GMT</pubDate>
-      <guid isPermaLink="false">1778815617188</guid>
+      <description><![CDATA[I am grateful for the gift of today.]]></description>
+      <pubDate>Fri, 15 May 2026 03:40:38 GMT</pubDate>
+      <guid isPermaLink="false">1778816438868</guid>
     </item>
   </channel>
 </rss>
