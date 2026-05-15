@@ -1,6 +1,57 @@
-name: Daily RSS Update
+name: Daily RSS Affirmation
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Runs every day at 00:00 UTC
-  workflow_dispatch:      # Allows you to trigger it manually for testing
+    - cron: '15 0 * * *'  # Runs daily at 00:15 UTC
+  workflow_dispatch:      # Allows manual testing
+
+jobs:
+  generate-rss:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate Random RSS Affirmation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // 1. Read and parse the JSON file
+            const rawData = fs.readFileSync('affirmations.json', 'utf8');
+            const affirmations = JSON.parse(rawData);
+            const n = affirmations.length;
+
+            if (n === 0) throw new Error("The affirmations array is empty.");
+
+            // 2. Generate random index i between 0 and n-1
+            const i = Math.floor(Math.random() * n);
+            const chosenText = affirmations[i];
+
+            // 3. Construct the RSS XML string
+            const rssContent = `<?xml version="1.0" encoding="UTF-8" ?>
+            <rss version="2.0">
+              <channel>
+                <title>Daily Affirmation</title>
+                <link>https://github.com{context.repo.owner}/${context.repo.repo}</link>
+                <description>Your daily dose of positivity</description>
+                <pubDate>${new Date().toUTCString()}</pubDate>
+                <item>
+                  <title>Today's Affirmation</title>
+                  <description>${chosenText}</description>
+                  <pubDate>${new Date().toUTCString()}</pubDate>
+                  <guid isPermaLink="false">${Date.now()}</guid>
+                </item>
+              </channel>
+            </rss>`.trim();
+
+            // 4. Write the file
+            fs.writeFileSync('todays-affirmation.xml', rssContent);
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update daily affirmation RSS feed"
+          file_pattern: 'todays-affirmation.xml'
+
