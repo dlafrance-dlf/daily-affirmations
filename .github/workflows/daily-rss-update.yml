@@ -1,0 +1,6 @@
+name: Daily RSS Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Runs every day at 00:00 UTC
+  workflow_dispatch:      # Allows you to trigger it manually for testing
